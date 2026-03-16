@@ -10,20 +10,15 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, substrate, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system: let
-      pkgs = import nixpkgs { inherit system; };
-      mkGoLibraryCheck = (import "${substrate}/lib/go-library-check.nix").mkGoLibraryCheck;
-    in {
-      checks.default = mkGoLibraryCheck pkgs {
-        pname = "akeyless-go-cloud-id";
-        version = "0.0.0-dev";
-        src = self;
-        vendorHash = "sha256-vthsshYCPS7fBM0F9NkOMeKDDomK7SJu8P0niZex1jk=";
-      };
-
-      devShells.default = pkgs.mkShellNoCC {
-        packages = with pkgs; [ go gopls gotools ];
-      };
-    });
+  outputs = inputs: (import "${inputs.substrate}/lib/repo-flake.nix" {
+    inherit (inputs) nixpkgs flake-utils;
+  }) {
+    self = inputs.self;
+    language = "go";
+    builder = "library";
+    pname = "akeyless-go-cloud-id";
+    vendorHash = "sha256-vthsshYCPS7fBM0F9NkOMeKDDomK7SJu8P0niZex1jk=";
+    description = "Go library to retrieve cloud identity for AWS, Azure, and GCP";
+    homepage = "https://github.com/pleme-io/akeyless-go-cloud-id";
+  };
 }
